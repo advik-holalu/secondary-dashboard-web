@@ -1,14 +1,24 @@
+import { NextResponse } from "next/server";
 import clientPromise from "../../../src/lib/mongodb";
 
 export async function GET() {
-  const client = await clientPromise;
-  const db = client.db("testdb");
+  try {
+    const client = await clientPromise;
+    await client.db().command({ ping: 1 });
 
-  await db.collection("ping").insertOne({
-    message: "hello from nextjs",
-    createdAt: new Date(),
-  });
+    return NextResponse.json({
+      status: "success",
+      message: "MongoDB connected",
+    });
+  } catch (error: any) {
+    console.error("MongoDB connection error:", error);
 
-  return Response.json({ ok: true });
+    return NextResponse.json(
+      {
+        status: "error",
+        message: error.message,
+      },
+      { status: 500 }
+    );
+  }
 }
-
